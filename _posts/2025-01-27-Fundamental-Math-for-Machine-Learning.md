@@ -130,6 +130,108 @@ where **i** is the index of data sets, **j** is the index of **features**
 #### batch gradient descent
 In the above method, we look at every example in the entire training set on every step, and is called **batch gradient descent**
 
+
+repeat until converge {
+
+  $$ \theta_0 := \theta_0 + \alpha \sum_{i=1}^{m} (y^i - h_\theta(x^i))x_0^i $$
+
+  $$ \theta_1 := \theta_1 + \alpha \sum_{i=1}^{m} (y^i - h_\theta(x^i))x_i^i $$
+
+  $$ ... $$
+
+  $$ \theta_n := \theta_n + \alpha \sum_{i=1}^{m} (y^i - h_\theta(x^i))x_n^i $$
+
+}
+
+* Pros: update of $\theta$s point to the deepest slope, which converges more quickly (TODO: illustrate with diagram)
+* Cons: need to transverse the whole data set (1..m) in each step, not efficient for large training data.
+
+#### stochastic gradient descent
+
+If we only update the $\theta$ with current data set's gradient error, the algorithm runs more efficiently:
+
+repeat until meet the goal {
+
+for i= 1...m { 
+
+$$ \theta_0 := \theta_0 + \alpha (y^i - h_\theta(x^i))x_0^i $$
+
+$$ \theta_1 := \theta_1 + \alpha (y^i - h_\theta(x^i))x_i^i $$
+
+$$ ... $$
+
+$$ \theta_n := \theta_n + \alpha (y^i - h_\theta(x^i))x_n^i $$
+
+}
+
+}
+
+* Pros: Efficient,especially for large training set.
+* Cons: may never converge, but should be close to the target.
+
+#### The normal equations
+
+For linear regression, there is a more efficient way to get the value of $\theta$, which computed directly from matrix. We omit the deduction process and only give the results here.
+
+Let matrix **X**(m..n) represents all of the x values in the training set, and vector $\overrightarrow{y}$ (n..1)
+
+$$
+  \mathbf{X} = \begin{bmatrix}x_0^0, x_1^0, ..., x_n^0
+                                \\  x_0^1, x_1^1, ..., x_n^1
+                                \\  ...
+                                \\  x_0^m, x_1^m, ..., x_n^m
+                     \end{bmatrix}
+ ,   \mathbf{Y} = \begin{bmatrix}   x_0
+                                \\  x_1
+                                \\  ...
+                                \\  x_m
+                     \end{bmatrix}
+$$
+
+Then the value of $\theta$ that minimizes $J(\theta)$ is given in closed form by the equation:
+
+$$ \theta = (X^TX)^{-1}X^T \overrightarrow{y}$$ 
+
+This is called the **normal equation**.
+
+#### Probabilistic interpretation of the cost function
+
+We defined the cost function as:
+
+
+$$ J(\theta) = \frac{1}{2}\sum_{i=1}^{n} (h_\theta(x^i) - y^i)^2 $$
+
+Why we chose this? is it optimal? This can be deducted from the likelihood.
+
+We can model the targe value y is a distribution of x:
+
+$$ y^{(i)} = \theta ^T x^{(i)} + \epsilon ^ {(i)} $$
+
+Where $ \epsilon ^ {(i)} $ models the unknown factor that might affect the result. **We assume** $ \epsilon ^ {(i)} $ **Normal distribution** with mean 0 and variance \sigma.  Then each sample of $y^{(i)}$ is a **conditional probability** with normal distribution whose mean value is $\theta ^T x^{(i)} $:
+
+$$ p(y^{(i)} | x{(i)} ;  \theta) = \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y{(i)} - \theta ^T x{(i)}) ^2 } {2\sigma^2}) $$
+
+Written in matrix form: 
+
+given **X** and $\theta$,  the conditional probability of $\overrightarrow{y}$ can be write as 
+$p(\overrightarrow{y} | X; \theta ）$, where $\theta$ are fixed values.
+
+We further assume $ \epsilon ^ {(i)} $ are independent to each other, which means the distribution of $ y ^ {(i)} $ are independent to each other. Then the **likelihood** function of y can be expressed as:
+
+$$ L(\theta) = p(\overrightarrow{y} | X; \theta ）= \prod_{i=1}^{m} \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y{(i)} - \theta ^T x{(i)}) ^2 } {2\sigma^2}) $$
+
+The logic is given  $x^{(1)},x^{(2)} ... x^{(m)}$ , the probability of  $y^{(1)},y^{(2)} ... y^{(m)}$  (which are the probability that all of the **y**s occurs at the same time with the exactly value) are 
+
+$$ p(y^{(1)} | x^{(1)}) * p(y^{(2)} | x^{(2)}) * ... * p(y^{(m)} | x^{(m)}) $$
+
+Given all that assumption, what might be the best values of $\theta$? in **Maximum Likelihood** theory, we should choose the $\theta$ so that the probability of observed data set (that is our training set) should be maximized. 
+
+Then the question turns out to be finding the maximum value of $L(\theta)$. To facilitate the deduction, we can also maximum $log(L\theta)$. If we substitute $L(\theta)$, we can get the  result that the optimal value of $\theta$ are those minimizes:
+
+$$ \frac{1}{2}\sum_{i=1}^{n} (h_\theta(x^i) - y^i)^2 $$
+
+which are the same as **least square** cost function.
+
 ---
 
 
