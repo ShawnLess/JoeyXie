@@ -40,6 +40,8 @@ toc:
     #   - name: Example Child Subsection 1
     #   - name: Example Child Subsection 2
   - name: Logistic Regression
+  - name: Generalized Linear Models
+  - name: Generative Learning
 
 
 # Below is an example of injecting additional post-specific styles.
@@ -209,7 +211,7 @@ $$ y^{(i)} = \theta ^T x^{(i)} + \epsilon ^ {(i)} $$
 
 Where $ \epsilon ^ {(i)} $ models the unknown factor that might affect the result. **We assume** $ \epsilon ^ {(i)} $ **Normal distribution** with mean 0 and variance \sigma.  Then each sample of $y^{(i)}$ is a **conditional probability** with normal distribution whose mean value is $\theta ^T x^{(i)} $:
 
-$$ p(y^{(i)} | x{(i)} ;  \theta) = \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y{(i)} - \theta ^T x{(i)}) ^2 } {2\sigma^2}) $$
+$$ p(y^{(i)} | x^{(i)} ;  \theta) = \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y^{(i)} - \theta ^T x^{(i)}) ^2 } {2\sigma^2}) $$
 
 Written in matrix form: 
 
@@ -218,7 +220,7 @@ $p(\overrightarrow{y} | X; \theta ）$, where $\theta$ are fixed values.
 
 We further assume $ \epsilon ^ {(i)} $ are independent to each other, which means the distribution of $ y ^ {(i)} $ are independent to each other. Then the **likelihood** function of y can be expressed as:
 
-$$ L(\theta) = p(\overrightarrow{y} | X; \theta ）= \prod_{i=1}^{m} \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y{(i)} - \theta ^T x{(i)}) ^2 } {2\sigma^2}) $$
+$$ L(\theta) = p(\overrightarrow{y} | X; \theta ）= \prod_{i=1}^{m} \frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ (y^{(i)} - \theta ^T x^{(i)}) ^2 } {2\sigma^2}) $$
 
 The logic is given  $x^{(1)},x^{(2)} ... x^{(m)}$ , the probability of  $y^{(1)},y^{(2)} ... y^{(m)}$  (which are the probability that all of the **y**s occurs at the same time with the exactly value) are 
 
@@ -226,11 +228,74 @@ $$ p(y^{(1)} | x^{(1)}) * p(y^{(2)} | x^{(2)}) * ... * p(y^{(m)} | x^{(m)}) $$
 
 Given all that assumption, what might be the best values of $\theta$? in **Maximum Likelihood** theory, we should choose the $\theta$ so that the probability of observed data set (that is our training set) should be maximized. 
 
-Then the question turns out to be finding the maximum value of $L(\theta)$. To facilitate the deduction, we can also maximum $log(L\theta)$. If we substitute $L(\theta)$, we can get the  result that the optimal value of $\theta$ are those minimizes:
+Then the question turns out to be finding the maximum value of $L(\theta)$. To facilitate the deduction, we can also maximum $log(L(\theta))$. If we substitute $L(\theta)$, we can get the  result that the optimal value of $\theta$ are those minimizes:
 
 $$ \frac{1}{2}\sum_{i=1}^{n} (h_\theta(x^i) - y^i)^2 $$
 
 which are the same as **least square** cost function.
+
+## Logistic Regression
+
+logistic regression only outputs 0 or 1, e.g., to decide if an email is spam or not. We define a different hypotheses for this prediction, which is called **sigmod function**
+
+$$ h_\theta(x)=\frac{1}{1-e^{-\theta^Tx}} $$
+
+Using the **maximum likelihood** methodology, we can get update rule for stochastic descent as:
+
+$$ \theta_j := \theta_j + \alpha \sum_{i=1}^{m} (y^i - h_\theta(x^i))x_j^i $$  
+
+which is the same as in linear regression except the $h_\theta(x)$ is different.
+
+## Newton's method
+
+Newton's method is another way to find the optimal $\theta$, which can be given as:
+
+$$ \theta := \theta - H^{-1}\triangledown_\theta l (\theta), \triangledown_\theta l (\theta)=\begin{bmatrix} \frac {\delta l (\theta)} {\theta_1}
+ \\ \frac {\delta l (\theta)} {\theta_2}
+ \\ ...
+ \\ \frac {\delta l (\theta)} {\theta_n}
+\end{bmatrix} $$
+
+And **H** is callded **Hessian matrix**, whose element is:
+
+$$ H_{ij}=\frac{\delta ^2 l (\theta)}  {\theta_i \theta_j} $$
+
+
+## Generalized Linear Models
+
+Most of the linear models can be expressed in a more generalized form:
+
+$$  p(y|\eta )= b(y)e^{\eta^TT(y)-a(\eta)} $$
+
+
+|   parameters      |  linear regression          |  logistic regression                | Softmax Regression              |
+|  ---------------  |  ---------------            |   ---------------                   |  ---------------                |
+|  $h_\theta(x)$    |  $ \theta^Tx $              |  $ \frac{1}{1+e^{-\theta^Tx}}$      | $\frac{e^{\theta_i^Tx}} {\sum_{i=1}^{k}e^{\theta_j^Tx} }$              |
+|   $\eta$          |  $\mu$                      |  $ log \frac{\varphi }{1- \varphi}$ | $ log \frac{\varphi_i }{ \varphi_k}$                                   |
+|   b(y)            |  $\frac{1}{\sqrt{2\pi\sigma}} exp (-\frac{ y^2}{2})$ |     1      | 1                                                                      |
+|   T(y)            |  y                          |  y                                  | a matrix mapping                                                       |
+|   $a(\eta)$       |  $\frac {\eta^2} {2}$       | $log( \frac{1}{1+e^\eta})$          | $-log(\varphi_k)  $                                                    |
+
+## Generative Learning
+
+1. **Discriminative learning**: learn **p(y\|x)** directly from the data set {**X**, $\overrightarrow{y}$}.
+2. **Generative learning**: model **p(x\|y)** and **p(y)**, and then model **p(y\|x)**.
+
+For example, if we trying to classify the pictures between monkey and dogs:
+
+$$ \begin{cases}
+ &  y=1, \text{is a monkey}\\
+ &  y=0, \text{is a dog}
+\end{cases} $$
+
+For discriminative learning, it will model the conditional distribution of y given x, and will find a straight line in the space **x**, and then classify the a new animal as either as monkey or dog.
+
+For generative learning, it first training a model of **p(x\|y=1)**, which means the distribution of x when y=1 (monkey); and then training a model of **p(x\|y=0)**, which means the distribution of x when y=0 (dog). For new pictures or new input x, we fit it into **p(x\|y=1)** and **p(x\|y=0)**, to see which model fits best and make the decisions.
+
+After modeling **p(x\|y)** and **p(y)**, we can then get **p(x\|y)** using **Bayes rule**:
+
+$$ p(y|x_1,x_2 ... x_n) = \frac {p(x_1,x_2,...x_n | y) p(y)} {p(x_1, x_2, ... x_3)} =  \frac {p(x_1,x_2,...x_n | y) p(y)} {p(x_1, x_2, ... x_3|y=1)p(y=1) + p(x_1, x_2, ... x_3|y=0)p(y=0) } $$
+
 
 ---
 
