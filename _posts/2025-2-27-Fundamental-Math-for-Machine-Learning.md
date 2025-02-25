@@ -296,63 +296,36 @@ After modeling **p(x\|y)** and **p(y)**, we can then get **p(x\|y)** using **Bay
 
 $$ p(y|x_1,x_2 ... x_n) = \frac {p(x_1,x_2,...x_n | y) p(y)} {p(x_1, x_2, ... x_3)} =  \frac {p(x_1,x_2,...x_n | y) p(y)} {p(x_1, x_2, ... x_3|y=1)p(y=1) + p(x_1, x_2, ... x_3|y=0)p(y=0) } $$
 
-Following is more concrete example to illustrating the difference between discriminative learning and generative learning.
+### Gaussian discriminant analysis
+In Gaussian discriminant analysis (GDA), we assume that p(x|y) is distributed according to a multivariate normal distribution:
 
-For logistic regression, the **average empirical loss function** is:
+$$ p(x;\mu,\Sigma)=\frac{1}{(2\pi)^{n/2}|\Sigma|^{1/2}}exp(-\frac{1}{2}(x-\mu)\Sigma^{-1}(x-u))) $$ 
 
-$$ J(\theta)= - \frac{1}{m}\sum_{i=1}^{m}y^{(i)}log(h(x^{(i)})+(1-y^{(i)})log ((1-h(x^{(i)})) $$
+where $\mu \in \mathbb{R}^n$ is the **mean vector** of **x**, and $\Sigma \in \mathbb{R}^{n \times n}$ is the covariance of **x**. The multivariate normal distribution can also written as "$N(\mu, \Sigma)$".
 
-where $ y^{(i)} \in \{0,1\}$, $h_\theta(x)=g(\theta^Tx), g(z)=1/(1-e^{-z}), x^{(i)}=\{x_0, x_1, ..., x_n\} $. 
+Back to the binary classification problem. In generative learning we model the distribution:
 
-for **discriminative learning**, we can update the $\theta$ with Newton's method.
+$$\begin{align}
+p(y)          &= \phi ^y (1-\phi)^y \\
+p(x|y=0)      &= N(\mu_0,\Sigma) \\
+p(x|y=1)      &= N(\mu_1,\Sigma)
+\end{align} $$
 
-$$ \frac{\delta J(\theta)}{\theta_j}= -\frac{\delta}{\theta_j}\{\frac{1}{m}\sum_{i=1}^{m}y^{(i)}log(g(\theta^T x^{(i)})+(1-y^{(i)})log ((1-g(\theta^Tx^{(i)})) \} $$
+The **p(y)** is called the **prior probability** which is what we assumed and can be evaluated and sampled with the training set (we also can evaluate the **p(y=0)** and **p(y=1)** with the training set). Given evaluated $\mu, \Sigma$, **p(x\|y=0)** and **p(x\|y=1)** are the known distribution, and we then can calculate with bayes rule:
 
-$$=-\frac{1}{m}\sum_{i=1}^{m}y^{(i)} \frac{1}{(g(\theta^T x^{(i)})}g'(\theta^T x^{(i)})x^{(i)}_j + (1-y^{(i)}) \frac{-1} {((1-g(\theta^Tx^{(i)}))} g'(\theta^T x^{(i)})x^{(i)}_j $$
+$$p(y|x)= \frac {p(x|y) p(y)}{ p(x|y=0)p(y=0) + p(x|y=1)p(y=1)}$$
 
-Given $ g'(z) = g(z)(1 - g(z)) $, the above equation become as:
+For train set $x=\{ x^{(0)} ... x^{(m)}\}$ and $y=\{ y^{(0)} ... y^{(m)}\}$, we can evaluate the parameter by maximized the log-likelihood function:
 
-$$ = - \frac{1}{m}\sum_{i=1}^{m}y^{(i)} \frac{1}{(g(\theta^T x^{(i)})}g(\theta^T x^{(i)})(1-g(\theta^T x^{(i)}))x^{(i)}_j - (1-y^{(i)}) \frac{1} {((1-g(\theta^Tx^{(i)}))} g(\theta^T x^{(i)})(1-g(\theta^T x^{(i)}))x^{(i)}_j $$ 
+$$\begin{align}
+\phi          &=  \frac{1}{m} \sum_{i=1}^{m} 1\{y^{(i)} =1 \}  \\
+\mu_0         &=  \frac{ \sum_{i=1}^{m} 1\{y^{(i)} =0 \}x^{(i)}} {\sum_{i=1}^{m} 1\{y^{(i)} =0 \}}  \\
+\mu_1         &=  \frac{ \sum_{i=1}^{m} 1\{y^{(i)} =1 \}x^{(i)}} {\sum_{i=1}^{m} 1\{y^{(i)} =1 \}}  \\
 
-$$ = - \frac{1}{m}\sum_{i=1}^{m}y^{(i)} (1-g(\theta^T x^{(i)}))x^{(i)}_j - (1-y^{(i)})  g(\theta^T x^{(i)})x^{(i)}_j $$
+\Sigma        &=  \frac{1}{m} \sum_{i=1}^{m} (x^{(i)}- \mu_{y^{(i)}} )) (x^{(i)}- \mu_{y^{(i)}} )^T \\
+\end{align}$$
 
-$$ = - \frac{1}{m}\sum_{i=1}^{m}y^{(i)}x^{(i)}_j -y^{(i)}g(\theta^T x^{(i)})x^{(i)}_j - g(\theta^T x^{(i)})x^{(i)}_j + y^{(i)}) g(\theta^T x^{(i)})x^{(i)}_j $$
-
-$$ = \frac{1}{m}\sum_{i=1}^{m}( g(\theta^T x^{(i)}) - y^{(i)} )x^{(i)}_j  $$
-
-Written in matrix form, where X's dimension is **m..n**:
-
-$$ \triangledown_\theta J(\theta) = \frac{1}{m} X ^T (g(X\theta) - Y) $$
-
-We then get the **Hessian** matrix:
-
-$$ H_{jk} = \frac{\delta ( \frac {\delta J(\theta)}   {\theta_j} )} {\theta_k}  =  \frac{\delta ( \frac{1}{m}\sum_{i=1}^{m}( g(\theta^T x^{(i)}) - y^{(i)} )x^{(i)}_j  )} {\theta_k}  $$
-
-$$ = \frac{1}{m}\sum_{i=1}^{m}g'(\theta^T x^{(i)})x^{(i)}_j x^{(i)}_k $$
-
-Remember $ g'(z) = g(z)(1 - g(z)) $, we get:
-
-$$ H_{jk} = \frac{1}{m}\sum_{i=1}^{m}g(\theta^T x^{(i)}) (1 - g(\theta^T x^{(i)}) )x^{(i)}_j x^{(i)}_k $$
-
-If we define $ d^{(i)}=g(\theta^Tx^{(i)}) (1 -  g(\theta^Tx^{(i)}))$, and D=\{ $d^{(1)}, d^{(2)}, ... , d^{(m)} $\}
-
-then we get:
-
-$$
-H = \begin{bmatrix}
-&...  &...  &... &...\\ 
-&x^{(1)}_jd^{(1)} &x^{(2)}_jd^{(2)} &x^{(...)}_jd^{(...)} &x^{(m)}_jd^{(m)}  \\
-&...  &... &... &... \\
-\end{bmatrix}
- 
-\begin{bmatrix}
-&...  &x^{(1)}_k  &... \\ 
-&...  &x^{(2)}_k  &... \\
-&...  &x^{(...)}_k  &... \\
-&...  &x^{(m)}_k  &... \\
-\end{bmatrix}$$
-
-$$ = (X \bullet D)^TX $$ 
+For more detailed coding and result illustration, please refer to [discriminative vs generative]({{"2025/02/21/Discriminative-Generative.html" | absolute_url }}).
 
 ---
 
