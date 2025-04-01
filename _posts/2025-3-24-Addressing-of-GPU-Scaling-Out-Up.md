@@ -90,16 +90,19 @@ There are two parallel programming models in large distributed system: shared me
 ![Scaling Programming Model](/assets/img/Scaling-Programming-Model.png){:width="100%"}
 
 **SHMEM** 
-* Shared data are allocated in **Symmetric Heap**, which has the **same virtual address**
+* Shared data are allocated in **Symmetric Heap**, but each PE manages its memory and the allocated buffer are **different virtual address**. Only size and alignment are coherent between PEs.
 * Memory are accessed using **One Sided** api, which means remote nodes is not aware when and who is access the shared memory.
 
 **MPI** 
 * No shared memory, only local buffer is used for **temporary** storage.
 * Memory are accessed using **Two Sided** api, which means remote nodes needs to **acknowledge** the transaction.
 
-**GPU Acceleration**  
-* Both SHMEM and MPI were designed for HPC before, which means both communication happens between **hosts** and **host**.
-* In GPU scaling system, this two programming model are accelerated with direct **GPU** to **GPU** communications. 
+**Fabric API**: 
+
+Libraries that aim to provide low-level, high-performance communication interfaces for applications in high-performance computing (HPC), cloud, data analytics, and other fields requiring efficient network communication. 
+
+* **UCX**: [https://openucx.org/](https://openucx.org/), unified API that handles many of the complexities of multi-transport environments.
+* **Libfabic**: [https://ofiwg.github.io/libfabric/](https://ofiwg.github.io/libfabric/), Fine-grained control over their network operations.
 
 
 ### Scaling Systems
