@@ -89,7 +89,7 @@ There are two parallel programming models in large distributed system: shared me
 
 ![Scaling Programming Model](/assets/img/Scaling-Programming-Model.png){:width="100%"}
 
-**SHMEM** 
+**SHMEM** mmm
 * Shared data are allocated in **Symmetric Heap**, but each PE manages its memory and the allocated buffer are **different virtual address**. Only size and alignment are coherent between PEs.
 * Memory are accessed using **One Sided** api, which means remote nodes is not aware when and who is access the shared memory.
 
@@ -107,18 +107,59 @@ Libraries that aim to provide low-level, high-performance communication interfac
 
 ### Scaling Systems
 
-This diagrams shows a general scaling system: 
+This diagrams shows a general scaling system：
 
 ![Scaling System](/assets/img/Scaling-System.png){:width="100%"}
 
 **Scaling Up**
-* **Host**: 8X GPU/Host
+Scaling up means integrating more GPUs in a GPU domain, which shares a single unified memory address space. A typical scaling up system consists of multiple Hosts and GPUs.
+
 * **GPU Domain**: direct GPU to GPU communication domain, via NVLink/NVSwitch/UALink/UEC etc.
+* **Host**: 8X GPU/Host
 
 **Scaling Out**
+Scaling out means more GPU domains connected by high speed network, but with different memory address space.
+
 * Host to Host communication, via high speed ethernet fabric or InfiniBand.
 
+**Addressing in Scaling Up**
+
+Recent scaling up system incorporates **unified memory addressing** (e.g., UALink), to facilitate remote memory access, 
+especially small data type accesses (such as word or double word). But this not necessary in distributed programme model.
+
+In a shared memory programming model, illustrated in following diagram, we suppose the GPU/GPU are connected with build-in Ethernet Controllers and Ethernet switches.
+
+![Scaling Up Address](/assets/img/Scaling-Up-Address.png){:width="100%"}
+
+The scaling up system uses two types of addressing:
+* **System Physical Address**: which is mapped to local GPU physical memories, like HBM.
+* **Network Physical Address**: which is mapping to remote GPU. The **NPA** contains the GPU ID that will be used to find the correct MAC address of the destination GPU.
+
+Three MMUs are used during GPU to GPU communication:
+* **GPU MMU**: General MMU used to translate virtual address to SPA. 
+* **Port MMU**: A table in Ethernet controller, or just a software implementation which maps GPU-ID to network MAC address.
+* **R-MMU**: A table in Ethernet controller, which will be used to translate NPA to local SPA, also do accessible control and checks.
+
+In shared memory programming model, the MMU setup and translation process can be described as Following:
+
+![Scaling-Up-Shared-Mem](/assets/img/Scaling-Shared-Mem.png){:width="100%"}
+
+1. **shmem_init()**:  The Shared Memory library will build up a **segment table** first, which will record the **shared** memory segments, including the start address and size. This table is **shared** between all PEs and will be referenced when accessed remotely.
+
+2. **shmem_malloc()**: User programming applies memories in the Symmetric shared heap. 
+  * All PE will do the same **malloc()** action and the **shmem_malloc()** will only return after all PE completes its operation.
+  * shmem_malloc() returns **Local Virtual Address** and different PE returns **different VA**, this VA only valid in this PE.
+  * The library will **register** the allocated memory regions in *R-MMU**, so remote access are allowed for this memory region, 
+     and **PIN** the corresponding physical pages so OS won't swap out the pages.
+  
+3. **shmem_access()**: User program access remote memory via **Local Virtual Address** returned by malloc() and destination PE ID:
+  *  **Symmetric Offset**  are calculated using __segment table__ and __local VA__.
+  *  **Remote VA** are generated using __segment table__ and __Symmetric Offset__.
+  *  **Network Packet** are composed using __remote VA__, __data__ and __command__.
+  *  **Remote PE**: Remote PE parsed the network packet, extract the __remote VA__ as its __local VA__, and do the accesses. __local VA__ are then translated to physical address with **R-MMU**.
+
 ---
+
 ### Reference
 {% bibliography --file 2025-3-26-GPU-Addressing %}
 
