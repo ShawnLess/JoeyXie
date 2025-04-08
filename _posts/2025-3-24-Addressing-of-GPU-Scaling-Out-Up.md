@@ -89,7 +89,7 @@ There are two parallel programming models in large distributed system: shared me
 
 ![Scaling Programming Model](/assets/img/Scaling-Programming-Model.png){:width="100%"}
 
-**SHMEM** mmm
+**SHMEM**
 * Shared data are allocated in **Symmetric Heap**, but each PE manages its memory and the allocated buffer are **different virtual address**. Only size and alignment are coherent between PEs.
 * Memory are accessed using **One Sided** api, which means remote nodes is not aware when and who is access the shared memory.
 
