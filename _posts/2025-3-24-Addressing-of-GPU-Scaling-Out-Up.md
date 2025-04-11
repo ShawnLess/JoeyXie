@@ -135,10 +135,74 @@ The scaling up system uses two types of addressing:
 * **System Physical Address**: which is mapped to local GPU physical memories, like HBM.
 * **Network Physical Address**: which is mapping to remote GPU. The **NPA** contains the GPU ID that will be used to find the correct MAC address of the destination GPU.
 
+**Addressing importing and exporting**
+
+In scaling up and scaling out system, the GPU under the same OS has is own **private** virtual address space, and not remote access is not allowed. The setup remote memory access, the remote GPU must **export** part of its memory, and other GPU must **import** this memory to its own address space.
+
+These __export__ and __import__ involves multiple soft modules. A **memory handle** is used to pass the information between these modules. For example in HIP programming, __hipIpcMemHandle_t__ is defined for these purpose:
+
+{% highlight c++ linenos %}
+
+#define hipIpcMemLazyEnablePeerAccess 0x01
+
+ #define HIP_IPC_HANDLE_SIZE 64
+
+ // The structure of remote memory handle.
+ typedef struct hipIpcMemHandle_st {
+     char reserved[HIP_IPC_HANDLE_SIZE];
+ } hipIpcMemHandle_t;
+
+ //Internal structure of IPC memory handle.
+#define IHIP_IPC_MEM_HANDLE_SIZE   32
+
+ typedef struct ihipIpcMemHandle_st {
+  char ipc_handle[IHIP_IPC_MEM_HANDLE_SIZE];  ///< ipc memory handle on ROCr
+  size_t psize;
+  size_t poffset;
+  int owners_process_id;
+  char reserved[IHIP_IPC_MEM_RESERVED_SIZE];
+} ihipIpcMemHandle_t;
+
+{% endhighlight %}
+
+* **export**: 
+
+When a remote GPU whens to export a memory region, it calls __hipIpcGetMemHandle()__ to get an memory handle, and passed it to other GPUs that wants to import the memory.
+
+{% highlight c++ linenos %}
+ // export the local device memory, which then be passed to other GPUs for remote access.
+hipError_t hipIpcGetMemHandle(hipIpcMemHandle_t* handle, void* devPtr);
+{% endhighlight %}
+
+* **import**: 
+
+The GPU which wants to import the memory calls __hipIpcOpenMemHandle__ to import the remote gpu address space:
+
+{% highlight c++ linenos %}
+ // Maps memory exported from another process with hipIpcGetMemHandle into the current device address space.
+ // hipIpcMemHandles from each device in a given process may only be opened by one context per device per other process.
+hipError_t hipIpcOpenMemHandle(void** devPtr, hipIpcMemHandle_t handle, unsigned int flags);
+{% endhighlight %}
+
+* **close**: 
+
+After remote GPU used the remote memory, it calls __hipIpcCloseMemHandle__ to delete the remote gpu address space from its own address space:
+
+{% highlight c++ linenos %}
+//close the imported remote memory handle.
+hipError_t hipIpcCloseMemHandle(void* devPtr);
+{% endhighlight %}
+
+![Scaling Import and Export ](/assets/img/Scaling-Import-Export.png){:width="70%"}
+
+During these import/export and the following remote memory process,  these MMUs are involved:
 Three MMUs are used during GPU to GPU communication:
-* **GPU MMU**: General MMU used to translate virtual address to SPA. 
+* **GPU MMU**: setup the TLB table during import, and translate translate virtual address to NPA. 
 * **Port MMU**: A table in Ethernet controller, or just a software implementation which maps GPU-ID to network MAC address.
-* **R-MMU**: A table in Ethernet controller, which will be used to translate NPA to local SPA, also do accessible control and checks.
+* **R-MMU**:Target GPU MMU translate NPA to local SPA, also do accessible control and checks.
+
+
+**Addressing mapping in Shared Programming Model**
 
 In shared memory programming model, the MMU setup and translation process can be described as Following:
 
