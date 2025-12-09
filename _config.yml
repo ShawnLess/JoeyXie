@@ -1,23 +1,23 @@
 # -----------------------------------------------------------------------------
 # Site settings
 # -----------------------------------------------------------------------------
-name: Shaolin Xie 
+name: Joey Xie 
 email: shawnless.xie@gmail.com
 description: > # this means to ignore newlines until "url:"
-    God help those who help themselves.   
+    Chessground.   
 footer_text: >
   Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
-url: https://shawnless.github.io/Personal/  # the base hostname & protocol for your site
+url: https://shawnless.github.io/JoeyXie/  # the base hostname & protocol for your site
 baseurl: # the subpath of your site, e.g. /blog/
 last_updated: # leave blank if you don't want to display last updated
 max_width: 930px
 # -----------------------------------------------------------------------------
 # Analytics and search engine verification
 # -----------------------------------------------------------------------------
-github_username: ShawnLess # your GitHub user name
+github_username:  # your GitHub user name
 twitter_username: # your Twitter handle
-linkedin_username: shawnless # your LinkedIn user name
+linkedin_username: # your LinkedIn user name
 scholar_userid: # your Google Scholar ID
 orcid_id: # your ORCID ID
 medium_username: # your Medium username
@@ -31,15 +31,15 @@ google_analytics: UA-XXXXXXXXX # out your google-analytics code
 # -----------------------------------------------------------------------------
 # Blog
 # -----------------------------------------------------------------------------
-blog_name: Shaolin
-blog_description: The profile of a chip geek.
+blog_name: Chessground
+blog_description: Everything about chess.
 
 # Pagination
 pagination:
   enabled: true
 
 related_blog_posts:
-  enabled: true
+  enabled: false
   max_related: 5
 
 # Giscus comments (RECOMMENDED)
@@ -101,7 +101,7 @@ announcements:
   limit: 5 # leave blank to include all the news in the `_news` folder
 
 latest_posts:
-  enabled: true
+  enabled: false
   scrollable: true # adds a vertical scroll bar if there are more than 3 new posts items
   limit: 3 # leave blank to include all the blog posts
 

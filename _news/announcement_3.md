@@ -1,8 +1,7 @@
 ---
 layout: post
-date: 2016-07-02 07:59:00-0400
+date: 2025-9-28 07:59:00-0400
 inline: true
 related_posts: false
 ---
-Joining University of California, San Diego as visiting scholar/research staff
-
+Moved back to CA, United States.
