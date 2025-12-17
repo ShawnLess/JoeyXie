@@ -5,6 +5,8 @@ permalink: /
 title: <strong>Joey </strong> Xie
 description: Beat Magic with Magic.
 
+lang: en
+
 profile:
   align: right
   image: Knight-Logo.jpg

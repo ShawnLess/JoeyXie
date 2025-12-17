@@ -105,6 +105,14 @@ latest_posts:
   scrollable: true # adds a vertical scroll bar if there are more than 3 new posts items
   limit: 3 # leave blank to include all the blog posts
 
+
+# -----------------------------------------------------------------------------
+# --- Multilingual Configuration ---
+# -----------------------------------------------------------------------------
+languages: ["en", "zh_CN"]
+default_lang: "en"
+exclude_from_localization: ["javascript", "images", "css", "assets"]
+url: https://127.0.0.1:4000
 # -----------------------------------------------------------------------------
 # Jekyll settings
 # -----------------------------------------------------------------------------
@@ -166,6 +174,7 @@ plugins:
   - jekyll-terser
   - jekyll-toc
   - jekyll-twitter-plugin
+  - jekyll-polyglot
   - jemoji
 
 # Sitemap settings
