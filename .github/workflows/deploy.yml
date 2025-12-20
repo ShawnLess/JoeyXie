@@ -91,7 +91,7 @@ jobs:
           export JEKYLL_ENV=production
           bundle exec jekyll clean
           mkdir -p _site/en _site/zh_CN
-          bundle exec jekyll build
+          bundle exec jekyll build --no-clean
       - name: Purge unused CSS 🧹
         run: |
           npm install -g purgecss
