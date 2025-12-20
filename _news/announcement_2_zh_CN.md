@@ -2,6 +2,6 @@
 layout: post
 date: 2020-10-16 16:11:00-0400
 inline: true
-lang: en
+lang: zh_CN
 ---
-Moved to Beijing, start professional chess training
+回到北京, 开始国际象棋训练
