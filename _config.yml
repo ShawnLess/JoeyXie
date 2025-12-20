@@ -112,7 +112,7 @@ latest_posts:
 languages: ["en", "zh_CN"]
 default_lang: "en"
 exclude_from_localization: ["javascript", "images", "css", "assets"]
-url: https://joey-xie.net
+# url: https://joey-xie.net
 # -----------------------------------------------------------------------------
 # Jekyll settings
 # -----------------------------------------------------------------------------
