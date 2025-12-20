@@ -90,8 +90,8 @@ jobs:
           pip3 install --upgrade nbconvert
           export JEKYLL_ENV=production
           bundle exec jekyll clean
-          mkdir -p _site/en _site/zh_CN
-          bundle exec jekyll build --no-clean
+          mkdir -p _site/zh_CN
+          bundle exec jekyll build
       - name: Purge unused CSS 🧹
         run: |
           npm install -g purgecss
